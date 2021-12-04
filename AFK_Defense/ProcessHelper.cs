@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Linq;
 using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace AFK_Defense
 {
@@ -10,6 +10,13 @@ namespace AFK_Defense
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool ShowWindow(IntPtr hWnd, EnumForWindow enumVal);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool IsIconic(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        static extern bool IsZoomed(IntPtr hWnd);
 
         [DllImport("user32.dll")]
         private static extern int SetForegroundWindow(IntPtr hwnd);
@@ -28,14 +35,20 @@ namespace AFK_Defense
             var process = Process.GetProcessesByName(processName).FirstOrDefault();
             if (process == null) return;
 
-            ShowWindow(process.MainWindowHandle, EnumForWindow.Restore);
+            var isMinimized = IsIconic(process.MainWindowHandle);
+            var isMaximized = IsZoomed(process.MainWindowHandle);
+
+            var displayRequest = EnumForWindow.Show;
+            if (isMinimized) displayRequest = EnumForWindow.Restore;
+            if (isMaximized) displayRequest = EnumForWindow.Show;
+
+            ShowWindow(process.MainWindowHandle, displayRequest);
             System.Threading.Thread.Sleep(3000);
             _ = SetForegroundWindow(process.MainWindowHandle);
         }
 
         public static bool CheckIfProcessIsRunning(string processName)
         {
-            Console.WriteLine($"Checking if {processName} is actively running.");
             return Process.GetProcessesByName(processName).Any();
         }
     }
