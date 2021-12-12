@@ -55,9 +55,10 @@ namespace AFK_Defense
                     while (_running)
                     {
                         ProcessHelper.SetForeGroundMainWindowHandle(_processName);
-                        KeyPresser.RunInCircle();
+                        KeyPresser.TargetCancel();
+                        //KeyPresser.RunInCircle();
                         // Wait 1 min
-                        System.Threading.Thread.Sleep(1000 * 60 * 5);
+                        System.Threading.Thread.Sleep(1000 * 60 * 20);
                     }
                 });
             }
